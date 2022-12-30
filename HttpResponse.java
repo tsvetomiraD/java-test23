@@ -1,34 +1,44 @@
-import java.net.http.HttpHeaders;
-import java.util.HashMap;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class HttpResponse<T> {
-    String response;
+    T body;
     int code;
+    Map<String, String> headers;
 
-    public HttpResponse(String response, int code) {
-        this.response = response;
+    public HttpResponse(T body, int code,Map<String, String> headers) {
+        this.body = body;
         this.code = code;
+        this.headers = headers;
     }
 
-    public String body() {
-        return response;
+    public T body() {
+        return body;
     }
 
     public Map<String, String> headers() {
-        Map<String, String> headers = new HashMap<>();
-        int indexOf = response.indexOf("headers\":{") + "headers\":{".length();
-        int indexTo = response.indexOf("}", indexOf);
-        String head = response.substring(indexOf, indexTo);
-        String[] arr = head.split(",");
-        for (String s : arr) {
-            headers.put(s.split(":")[0], s.split(":")[1]);
-        }
-
         return headers;
     }
 
-    public  int	statusCode() {
+    public int statusCode() {
         return code;
     }
+
+    public static class BodyHandlers {
+        public static BodyHandler<String> ofString() {
+            return new BodyHandler<>();
+        }
+
+        public static BodyHandler<Path> ofFile(Path path) {
+            return new BodyHandler<>(path);
+        }
+    }
+    public static class BodyHandler<T> {
+        Path path;
+        BodyHandler(Path path) {
+            this.path = path;
+        }
+        BodyHandler() {}
+    }
+
 }
